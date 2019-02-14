@@ -56,11 +56,7 @@ class Usuario
 
 
         if (count($result) > 0) {
-            $row = $result[0];
-            $this->setId($row["id"]);
-            $this->setLogin($row["login"]);
-            $this->setSenha($row["senha"]);
-            $this->setDtcadastro($row["dt_cadastro"]);
+            $this->setData($result[0]);
         }
     }
 
@@ -73,21 +69,25 @@ class Usuario
 
     public function login($login, $password)
     {
-        $sql = new Sql();
-        $result = $sql->select("SELECT * FROM tb_usuarios WHERE login = :LOGIN AND senha = :SENHA", array(
-            ":LOGIN" => $login,
-            ":SENHA" => $password
-        ));
+        $result = $this->rowByUsuarioSenha($login, $password);
 
         if (count($result) > 0) {
-            $row = $result[0];
-            $this->setId($row["id"]);
-            $this->setLogin($row["login"]);
-            $this->setSenha($row["senha"]);
-            $this->setDtcadastro($row["dt_cadastro"]);
-
+            $this->setData($result[0]);
         } else {
             throw new Exception("Login e/ou senha inválidos");
+        }
+    }
+
+    public function insert($login, $password)
+    {
+        $result = $this->rowByUsuarioSenha($login, $password);
+
+        if (count($result) == 0) {
+            $sql = new Sql();
+            $sql->query("INSERT INTO tb_usuarios (login, senha) VALUE(:LOGIN, :SENHA)", array(
+                ":LOGIN" => $login,
+                ":SENHA" => $password
+            ));
         }
     }
 
@@ -99,6 +99,25 @@ class Usuario
             "senha" => $this->getSenha(),
             "dt_cadastro" => $this->getDtcadastro()
         ));
+    }
+
+    private function rowByUsuarioSenha($login, $password) : array
+    {
+        $sql = new Sql();
+        $result = $sql->select("SELECT * FROM tb_usuarios WHERE login = :LOGIN AND senha = :SENHA", array(
+            ":LOGIN" => $login,
+            ":SENHA" => $password
+        ));
+
+        return $result;
+    }
+
+    private function setData($row)
+    {
+        $this->setId($row["id"]);
+        $this->setLogin($row["login"]);
+        $this->setSenha($row["senha"]);
+        $this->setDtcadastro($row["dt_cadastro"]);
     }
 }
 
