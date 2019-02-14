@@ -64,6 +64,33 @@ class Usuario
         }
     }
 
+    public function getList()
+    {
+        $sql = new Sql();
+        $result = $sql->select("SELECT * FROM tb_usuarios ORDER BY login");
+        return $result;
+    }
+
+    public function login($login, $password)
+    {
+        $sql = new Sql();
+        $result = $sql->select("SELECT * FROM tb_usuarios WHERE login = :LOGIN AND senha = :SENHA", array(
+            ":LOGIN" => $login,
+            ":SENHA" => $password
+        ));
+
+        if (count($result) > 0) {
+            $row = $result[0];
+            $this->setId($row["id"]);
+            $this->setLogin($row["login"]);
+            $this->setSenha($row["senha"]);
+            $this->setDtcadastro($row["dt_cadastro"]);
+
+        } else {
+            throw new Exception("Login e/ou senha inválidos");
+        }
+    }
+
     public function __toString()
     {
         return json_encode(array(
